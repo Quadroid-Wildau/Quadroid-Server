@@ -10,6 +10,10 @@ describe 'Landmark alerts API' do
     Paperclip::Attachment.any_instance.stub(:post_process).and_return(true)
   end
 
+  before(:each) do
+    stub_paperclip(LandmarkAlert)
+  end
+
   describe 'index action' do
     it 'should return empty landmarks array' do
       get url
@@ -19,7 +23,6 @@ describe 'Landmark alerts API' do
     end
 
     it 'should return all landmarks' do
-      stub_paperclip(LandmarkAlert)
       landmarks = create_list(:landmark_alert, 10)
       get url
       expect(response).to be_success
@@ -31,7 +34,6 @@ describe 'Landmark alerts API' do
     end
 
     it 'should include complete data per entry' do
-      stub_paperclip(LandmarkAlert)
       landmarks = create_list(:landmark_alert, 5)
       get url
       result = JSON.parse(response.body)
@@ -46,7 +48,20 @@ describe 'Landmark alerts API' do
   end
 
   describe 'show action' do
-
+    it 'should return landmark' do
+      landmark = create(:landmark_alert)
+      get "#{url}/#{landmark.id}"
+      expect(response).to be_success
+      result = JSON.parse(response.body)
+      result['landmark_alert']['id'].should eq(landmark.id)
+    end
+    it 'should return not found (404/1)' do
+      get "#{url}/1"
+      response.response_code.should == 404
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+      result['error']['message'].should_not be_blank
+    end
   end
 
   describe 'create action' do
