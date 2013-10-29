@@ -23,6 +23,12 @@ gem 'active_attr'
 gem 'doorkeeper', '~> 0.7.0'
 gem 'ruby-hmac'
 
+# files / images
+gem 'paperclip', '~> 3.5.1'
+gem 'rmagick'
+gem 'delayed_job_active_record'
+gem 'delayed_paperclip'
+
 # development
 group :development, :test do
   # deployment

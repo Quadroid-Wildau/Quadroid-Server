@@ -2,8 +2,47 @@ require 'spec_helper'
 
 describe 'Landmark alerts API' do
 
-  describe 'index action' do
+  let(:url) { "/landmark_alerts" }
 
+  def stub_paperclip(model)
+    model.any_instance.stub(:save_attached_files).and_return(true)
+    model.any_instance.stub(:delete_attached_files).and_return(true)
+    Paperclip::Attachment.any_instance.stub(:post_process).and_return(true)
+  end
+
+  describe 'index action' do
+    it 'should return empty landmarks array' do
+      get url
+      expect(response).to be_success
+      result = JSON.parse(response.body)
+      result['landmark_alerts'].count.should eq(0)
+    end
+
+    it 'should return all landmarks' do
+      stub_paperclip(LandmarkAlert)
+      landmarks = create_list(:landmark_alert, 10)
+      get url
+      expect(response).to be_success
+      result = JSON.parse(response.body)
+      result['landmark_alerts'].count.should eq(landmarks.count)
+      landmarks.each do |landmark|
+        result['landmark_alerts'].find{ |v| v['id'] == landmark.id }.should_not be_nil
+      end
+    end
+
+    it 'should include complete data per entry' do
+      stub_paperclip(LandmarkAlert)
+      landmarks = create_list(:landmark_alert, 5)
+      get url
+      result = JSON.parse(response.body)
+      result['landmark_alerts'].each do |e|
+        (e['image_url'] =~ /missing\.png/).should_not be_nil
+        e['latitude'].to_f.should > 0
+        e['longitude'].to_f.should > 0
+        e['height'].to_f.should > 0
+        e['detection_date'].to_i.should > 0
+      end
+    end
   end
 
   describe 'show action' do

@@ -11,7 +11,20 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131029130908) do
+ActiveRecord::Schema.define(:version => 20131029132329) do
+
+  create_table "landmark_alerts", :force => true do |t|
+    t.float    "latitude"
+    t.float    "longitude"
+    t.float    "height"
+    t.datetime "detection_date"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
+    t.string   "image_file_name"
+    t.string   "image_content_type"
+    t.integer  "image_file_size"
+    t.datetime "image_updated_at"
+  end
 
   create_table "sessions", :force => true do |t|
     t.string   "session_id", :null => false
