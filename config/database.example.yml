@@ -9,15 +9,15 @@ defaults: &defaults
 
 development:
   <<: *defaults
-  database: "bestwert_website_development_2"
+  database: "quadroid_server_development"
 
 test: &test
   <<: *defaults
-  database: "bestwert_website_test_2"
+  database: "quadroid_server_test"
 
 production: &production
   <<: *defaults
-  database: "bestwert_website"
+  database: "quadroid_server"
 
 staging:
   <<: *production
