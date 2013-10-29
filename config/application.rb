@@ -17,6 +17,7 @@ module QuadroidServer
 
     # Custom directories with classes and modules you want to be autoloadable.
     # config.autoload_paths += %W(#{config.root}/extras)
+    config.autoload_paths += Dir["#{config.root}/lib/api/"]
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -27,7 +28,7 @@ module QuadroidServer
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
-    # config.time_zone = 'Central Time (US & Canada)'
+    config.time_zone = 'Berlin'
 
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
@@ -37,7 +38,7 @@ module QuadroidServer
     config.encoding = "utf-8"
 
     # Configure sensitive parameters which will be filtered from the log file.
-    config.filter_parameters += [:password]
+    config.filter_parameters += [:password, :token, :auth_token]
 
     # Enable escaping HTML in JSON.
     config.active_support.escape_html_entities_in_json = true
@@ -58,5 +59,19 @@ module QuadroidServer
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    #load config
+    file = File.read(File.expand_path('../application.yml', __FILE__))
+    if file.present?
+      file_config = YAML.load(file)
+      file_config = file_config.fetch(Rails.env, {})
+      file_config.each do |key, value|
+        if value.kind_of? String
+          eval('config.' + key.to_s.downcase + "='" + value + "'")
+        else
+          eval('config.' + key.to_s.downcase + '=' + value.to_s)
+        end
+      end
+    end
   end
 end

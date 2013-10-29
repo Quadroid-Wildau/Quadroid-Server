@@ -18,6 +18,9 @@ gem 'json'
 gem 'therubyracer', '0.10.2', :require => 'v8'
 gem 'active_model_serializers'
 gem 'active_attr'
+
+# API / auth
+gem 'doorkeeper', '~> 0.7.0'
 gem 'ruby-hmac'
 
 # development
