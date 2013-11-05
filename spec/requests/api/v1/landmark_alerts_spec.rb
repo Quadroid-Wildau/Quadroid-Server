@@ -4,14 +4,15 @@ describe 'Landmark alerts API' do
 
   let(:url) { "/landmark_alerts" }
 
-  def stub_paperclip(model)
-    model.any_instance.stub(:save_attached_files).and_return(true)
-    model.any_instance.stub(:delete_attached_files).and_return(true)
-    Paperclip::Attachment.any_instance.stub(:post_process).and_return(true)
-  end
+  let(:dummy_image) { Rack::Test::UploadedFile.new(Rails.root + 'spec/factories/landmark_images/example.png', 'image/png') }
 
-  before(:each) do
-    stub_paperclip(LandmarkAlert)
+  def to_params(landmark)
+    hash = { landmark_alert: {} }
+    hash[:landmark_alert][:latitude] = landmark.latitude if landmark.latitude
+    hash[:landmark_alert][:longitude] = landmark.longitude if landmark.longitude
+    hash[:landmark_alert][:height] = landmark.height if landmark.height
+    hash[:landmark_alert][:detection_date] = landmark.detection_date.to_i if landmark.detection_date
+    hash
   end
 
   describe 'index action' do
@@ -65,17 +66,94 @@ describe 'Landmark alerts API' do
   end
 
   describe 'create action' do
+    it 'should return 400/1 for missing latitude' do
+      landmark = build(:landmark_alert, latitude: nil)
+      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      response.response_code.should == 400
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+      result['error']['messages']['latitude'].should_not be_blank
+    end
+    it 'should return 400/1 for missing longitude' do
+      landmark = build(:landmark_alert, longitude: nil)
+      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      response.response_code.should == 400
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+      result['error']['messages']['longitude'].should_not be_blank
+    end
+    it 'should return 400/1 for missing height' do
+      landmark = build(:landmark_alert, height: nil)
+      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      response.response_code.should == 400
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+      result['error']['messages']['height'].should_not be_blank
+    end
+    it 'should return 400/1 for missing detection_date' do
+      landmark = build(:landmark_alert, detection_date: nil)
+      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      response.response_code.should == 400
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+      result['error']['messages']['detection_date'].should_not be_blank
+    end
+    it 'should create landmark' do
+      landmark = build(:landmark_alert)
+      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(1)
+      response.response_code.should == 200
+      result = JSON.parse(response.body)
+      result['landmark_alert']['latitude'].should eq(landmark.latitude)
+      result['landmark_alert']['longitude'].should eq(landmark.longitude)
+      result['landmark_alert']['height'].should eq(landmark.height)
+      result['landmark_alert']['detection_date'].should eq(landmark.detection_date.to_i)
+    end
+    it 'should upload image' do
+      landmark = build(:landmark_alert)
+      expect {
+        hash = to_params(landmark)
+        hash[:landmark_alert].merge!({ image: dummy_image })
+        post url, hash
+      }.to change(LandmarkAlert, :count).by(1)
+      response.response_code.should == 200
+      result = JSON.parse(response.body)
+      landmark = LandmarkAlert.find_by_id(result['landmark_alert']['id'])
+      landmark.should_not be_nil
+      landmark.image.path.should_not be_nil
+      File.exists?(Rails.root + landmark.image.path).should be_true
+    end
+
+
+    # validates_presence_of :latitude
+    # validates_presence_of :longitude
+    # validates_presence_of :height
+    # validates_presence_of :detection_date
 
     # post :photo, :file => Rack::Test::UploadedFile.new(path, mime_type) # text/jpg
 
   end
 
   describe 'update action' do
+    it 'should return 404/1 for not existing id'
+    it 'should return 400/2 for missing latitude'
+    it 'should return 400/2 for missing longitude'
+    it 'should return 400/2 for missing height'
+    it 'should return 400/2 for missing detection_date'
+    it 'should update landmark data'
+    it 'should update image'
 
+    # validates_presence_of :latitude
+    # validates_presence_of :longitude
+    # validates_presence_of :height
+    # validates_presence_of :detection_date
+
+    # post :photo, :file => Rack::Test::UploadedFile.new(path, mime_type) # text/jpg
   end
 
   describe 'destroy action' do
-
+    it 'should return 404/1 for not existing id'
+    it 'should destroy landmark alert'
+    it 'should remove image file'
   end
 
 
