@@ -121,6 +121,7 @@ describe 'Landmark alerts API' do
       landmark.should_not be_nil
       landmark.image.path.should_not be_nil
       File.exists?(Rails.root + landmark.image.path).should be_true
+      landmark.destroy
     end
     it 'should create only for desktop client'
   end

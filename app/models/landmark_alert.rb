@@ -25,7 +25,5 @@ class LandmarkAlert < ActiveRecord::Base
   # callback: before_destroy
   def remove_file
     self.image.clear
-    require 'fileutils'
-    FileUtils.rm_rf("#{Rails.root}public/files/images/landmarks/#{self.id}")
   end
 end

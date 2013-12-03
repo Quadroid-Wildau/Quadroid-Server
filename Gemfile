@@ -50,6 +50,7 @@ group :development, :test do
   gem 'debugger'      # debugger
   gem 'simplecov', :require => false  # code coverage
   gem 'factory_girl_rails'
+  gem 'database_cleaner'
 end
 
 # assets
