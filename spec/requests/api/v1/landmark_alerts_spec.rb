@@ -122,7 +122,7 @@ describe 'Landmark alerts API' do
       landmark.image.path.should_not be_nil
       File.exists?(Rails.root + landmark.image.path).should be_true
     end
-
+    it 'should create only for desktop client'
   end
 
   describe 'update action' do
@@ -144,6 +144,7 @@ describe 'Landmark alerts API' do
       l = LandmarkAlert.find(landmark.id)
       l.height.should eq(new_height)
     end
+    it 'should update only for desktop client'
   end
 
   describe 'destroy action' do
@@ -160,7 +161,13 @@ describe 'Landmark alerts API' do
       result = JSON.parse(response.body)
       result['status']['deleted'].should be_true
     end
-    # it 'should remove image file'
+    it 'should delete only for desktop client'
+  end
+
+  describe 'push notification' do
+    it 'should notify at create'
+    it 'should notify at update'
+    it 'should notify all app clients'
   end
 
 end
