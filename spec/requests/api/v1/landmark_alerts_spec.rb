@@ -123,48 +123,44 @@ describe 'Landmark alerts API' do
       File.exists?(Rails.root + landmark.image.path).should be_true
     end
 
-
-    # validates_presence_of :latitude
-    # validates_presence_of :longitude
-    # validates_presence_of :height
-    # validates_presence_of :detection_date
-
-    # post :photo, :file => Rack::Test::UploadedFile.new(path, mime_type) # text/jpg
-
   end
 
   describe 'update action' do
-    it 'should return 404/1 for not existing id'
-    it 'should return 400/2 for missing latitude'
-    it 'should return 400/2 for missing longitude'
-    it 'should return 400/2 for missing height'
-    it 'should return 400/2 for missing detection_date'
-    it 'should update landmark data'
-    it 'should update image'
-
-    # validates_presence_of :latitude
-    # validates_presence_of :longitude
-    # validates_presence_of :height
-    # validates_presence_of :detection_date
-
-    # post :photo, :file => Rack::Test::UploadedFile.new(path, mime_type) # text/jpg
+    it 'should return 404/1 for not existing id' do
+      landmark = build(:landmark_alert)
+      expect { put "#{url}/9999", to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      response.response_code.should == 404
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+    end
+    it 'should update landmark data' do
+      landmark = create(:landmark_alert)
+      new_height = landmark.height + 200
+      put "#{url}/#{landmark.id}", to_params(LandmarkAlert.new(height: new_height))
+      response.response_code.should == 200
+      result = JSON.parse(response.body)
+      result['landmark_alert']['id'].should eq(landmark.id)
+      result['landmark_alert']['height'].should eq(new_height)
+      l = LandmarkAlert.find(landmark.id)
+      l.height.should eq(new_height)
+    end
   end
 
   describe 'destroy action' do
-    it 'should return 404/1 for not existing id'
-    it 'should destroy landmark alert'
-    it 'should remove image file'
+    it 'should return 404/1 for not existing id' do
+      expect { delete "#{url}/9999", nil }.to change(LandmarkAlert, :count).by(0)
+      response.response_code.should == 404
+      result = JSON.parse(response.body)
+      result['error']['code'].should eq(1)
+    end
+    it 'should destroy landmark alert' do
+      landmark = create(:landmark_alert)
+      expect { delete "#{url}/#{landmark.id}", nil }.to change(LandmarkAlert, :count).by(-1)
+      response.response_code.should == 200
+      result = JSON.parse(response.body)
+      result['status']['deleted'].should be_true
+    end
+    # it 'should remove image file'
   end
-
-
-  # it 'xxx' do
-  #   FactoryGirl.create_list(:message, 10)
-
-  #   get '/api/v1/messages'
-
-  #   expect(response).to be_success            # test for the 200 status-code
-  #   json = JSON.parse(response.body)
-  #   expect(json['messages'].length).to eq(10) # check to make sure the right amount of messages are returned
-  # end
 
 end

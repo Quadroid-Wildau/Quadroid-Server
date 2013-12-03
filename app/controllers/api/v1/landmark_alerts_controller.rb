@@ -46,7 +46,7 @@ class Api::V1::LandmarkAlertsController < Api::V1::BaseController
   # landmark_alert[detection_date]
   def update
     landmark = LandmarkAlert.find_by_id(params[:id])
-    landmark.detection_date = DateTime.new(landmark.detection_date) unless landmark.detection_date.blank?
+    landmark.detection_date = DateTime.new(params[:landmark_alert].delete(:detection_date).to_i) if landmark && params[:landmark_alert][:detection_date].present?
 
     unless landmark
       render json: { error: { code: 1, message: 'Resource not found' } }, status: :not_found
