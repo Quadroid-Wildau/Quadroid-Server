@@ -20,6 +20,8 @@ gem 'active_model_serializers'
 gem 'active_attr'
 
 # API / auth
+gem 'devise', '~> 3.2.2'
+gem 'devise-encryptable', '~> 0.1.2'
 gem 'doorkeeper', '~> 0.7.0'
 gem 'ruby-hmac'
 
