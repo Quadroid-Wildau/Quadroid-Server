@@ -1,10 +1,23 @@
 require 'spec_helper'
 
-describe 'Landmark alerts API' do
+include Devise::TestHelpers
 
-  let(:url) { "/landmark_alerts" }
+describe Api::V1::LandmarkAlertsController do
 
   let(:dummy_image) { Rack::Test::UploadedFile.new(Rails.root + 'spec/factories/landmark_images/example.png', 'image/png') }
+
+  let(:token) { double(:accessible? => true) }
+
+  before do
+    controller.stub(:doorkeeper_token) { token }
+  end
+
+  before(:each) do
+    request.env['ACCEPT'] = "application/vnd.quadroid-server-v1+json"
+    @user = create(:user)
+    sign_in :user, @user
+    controller.stub(:current_user).and_return(@user)
+  end
 
   def to_params(landmark)
     hash = { landmark_alert: {} }
@@ -17,7 +30,7 @@ describe 'Landmark alerts API' do
 
   describe 'index action' do
     it 'should return empty landmarks array' do
-      get url
+      get :index, nil
       expect(response).to be_success
       result = JSON.parse(response.body)
       result['landmark_alerts'].count.should eq(0)
@@ -25,7 +38,7 @@ describe 'Landmark alerts API' do
 
     it 'should return all landmarks' do
       landmarks = create_list(:landmark_alert, 10)
-      get url
+      get :index, nil
       expect(response).to be_success
       result = JSON.parse(response.body)
       result['landmark_alerts'].count.should eq(landmarks.count)
@@ -36,7 +49,7 @@ describe 'Landmark alerts API' do
 
     it 'should include complete data per entry' do
       landmarks = create_list(:landmark_alert, 5)
-      get url
+      get :index, nil
       result = JSON.parse(response.body)
       result['landmark_alerts'].each do |e|
         (e['image_url'] =~ /missing\.png/).should_not be_nil
@@ -51,13 +64,13 @@ describe 'Landmark alerts API' do
   describe 'show action' do
     it 'should return landmark' do
       landmark = create(:landmark_alert)
-      get "#{url}/#{landmark.id}"
+      get :show, id: landmark.id
       expect(response).to be_success
       result = JSON.parse(response.body)
       result['landmark_alert']['id'].should eq(landmark.id)
     end
     it 'should return not found (404/1)' do
-      get "#{url}/1"
+      get :show, id: 1
       response.response_code.should == 404
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
@@ -68,7 +81,7 @@ describe 'Landmark alerts API' do
   describe 'create action' do
     it 'should return 400/1 for missing latitude' do
       landmark = build(:landmark_alert, latitude: nil)
-      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      expect { post :create, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
       response.response_code.should == 400
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
@@ -76,7 +89,7 @@ describe 'Landmark alerts API' do
     end
     it 'should return 400/1 for missing longitude' do
       landmark = build(:landmark_alert, longitude: nil)
-      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      expect { post :create, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
       response.response_code.should == 400
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
@@ -84,7 +97,7 @@ describe 'Landmark alerts API' do
     end
     it 'should return 400/1 for missing height' do
       landmark = build(:landmark_alert, height: nil)
-      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      expect { post :create, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
       response.response_code.should == 400
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
@@ -92,7 +105,7 @@ describe 'Landmark alerts API' do
     end
     it 'should return 400/1 for missing detection_date' do
       landmark = build(:landmark_alert, detection_date: nil)
-      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      expect { post :create, to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
       response.response_code.should == 400
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
@@ -100,7 +113,7 @@ describe 'Landmark alerts API' do
     end
     it 'should create landmark' do
       landmark = build(:landmark_alert)
-      expect { post url, to_params(landmark) }.to change(LandmarkAlert, :count).by(1)
+      expect { post :create, to_params(landmark) }.to change(LandmarkAlert, :count).by(1)
       response.response_code.should == 200
       result = JSON.parse(response.body)
       result['landmark_alert']['latitude'].should eq(landmark.latitude)
@@ -113,7 +126,7 @@ describe 'Landmark alerts API' do
       expect {
         hash = to_params(landmark)
         hash[:landmark_alert].merge!({ image: dummy_image })
-        post url, hash
+        post :create, hash
       }.to change(LandmarkAlert, :count).by(1)
       response.response_code.should == 200
       result = JSON.parse(response.body)
@@ -129,7 +142,7 @@ describe 'Landmark alerts API' do
   describe 'update action' do
     it 'should return 404/1 for not existing id' do
       landmark = build(:landmark_alert)
-      expect { put "#{url}/9999", to_params(landmark) }.to change(LandmarkAlert, :count).by(0)
+      expect { put :update, to_params(landmark).merge(id: 9999) }.to change(LandmarkAlert, :count).by(0)
       response.response_code.should == 404
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
@@ -137,7 +150,7 @@ describe 'Landmark alerts API' do
     it 'should update landmark data' do
       landmark = create(:landmark_alert)
       new_height = landmark.height + 200
-      put "#{url}/#{landmark.id}", to_params(LandmarkAlert.new(height: new_height))
+      put :update, to_params(LandmarkAlert.new(height: new_height)).merge(id: landmark.id)
       response.response_code.should == 200
       result = JSON.parse(response.body)
       result['landmark_alert']['id'].should eq(landmark.id)
@@ -150,14 +163,14 @@ describe 'Landmark alerts API' do
 
   describe 'destroy action' do
     it 'should return 404/1 for not existing id' do
-      expect { delete "#{url}/9999", nil }.to change(LandmarkAlert, :count).by(0)
+      expect { delete :destroy, id: 9999 }.to change(LandmarkAlert, :count).by(0)
       response.response_code.should == 404
       result = JSON.parse(response.body)
       result['error']['code'].should eq(1)
     end
     it 'should destroy landmark alert' do
       landmark = create(:landmark_alert)
-      expect { delete "#{url}/#{landmark.id}", nil }.to change(LandmarkAlert, :count).by(-1)
+      expect { delete :destroy, id: landmark.id }.to change(LandmarkAlert, :count).by(-1)
       response.response_code.should == 200
       result = JSON.parse(response.body)
       result['status']['deleted'].should be_true

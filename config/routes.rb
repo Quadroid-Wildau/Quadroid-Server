@@ -1,5 +1,9 @@
 QuadroidServer::Application.routes.draw do
 
+  # auth and oauth 2 provider
+  devise_for :users
+  use_doorkeeper
+
   # api accept header:
   # application/vnd.quadroid-server-vX+json
   # X = version number
