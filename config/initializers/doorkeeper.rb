@@ -5,7 +5,9 @@ Doorkeeper.configure do
 
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
-    current_user || warden.authenticate!(:scope => :user)
+    # current_user || warden.authenticate!(:scope => :user)
+    user = User.find_by_email(params[:email])
+    user.valid_password?(params[:password])
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
