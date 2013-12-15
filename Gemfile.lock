@@ -234,6 +234,7 @@ DEPENDENCIES
   doorkeeper (~> 0.7.0)
   factory_girl_rails
   gcm_on_rails
+  jquery-rails (~> 3.0.4)
   json
   mysql2
   newrelic_rpm
