@@ -93,4 +93,3 @@ after 'deploy', 'deploy:restart_thin'
 # after "deploy:restart", "delayed_job:restart"
 
 require './config/boot'
-require 'airbrake/capistrano'
