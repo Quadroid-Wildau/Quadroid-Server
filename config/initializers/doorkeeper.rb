@@ -7,7 +7,12 @@ Doorkeeper.configure do
   resource_owner_authenticator do
     # current_user || warden.authenticate!(:scope => :user)
     user = User.find_by_email(params[:email])
-    user.valid_password?(params[:password])
+    user.valid_password?(params[:password]) ? user : nil
+  end
+
+  resource_owner_from_credentials do
+    user = User.find_by_email(params[:email])
+    user.valid_password?(params[:password]) ? user : nil
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
@@ -63,4 +68,7 @@ Doorkeeper.configure do
   # skip_authorization do |resource_owner, client|
   #   client.superapp? or resource_owner.admin?
   # end
+  skip_authorization do |r,c|
+    true
+  end
 end
