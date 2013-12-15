@@ -14,6 +14,7 @@ QuadroidServer::Application.routes.draw do
       scope module: :v1 do
         # controllers in app/controllers/api/v1
 
+        resources :gcm_devices, only: [:create, :show]
         resources :landmark_alerts, only: [:index, :show, :create, :update, :destroy]
       end
     end

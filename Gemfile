@@ -31,6 +31,9 @@ gem 'rmagick'
 gem 'delayed_job_active_record'
 gem 'delayed_paperclip'
 
+# notifications
+gem 'gcm_on_rails'
+
 # development
 group :development, :test do
   # deployment
