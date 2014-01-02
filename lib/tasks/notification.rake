@@ -8,7 +8,7 @@ namespace :notifications do
       n.device = device
       n.collapse_key = 'updates_available'
       n.delay_while_idle = true
-      n.data = { registration_ids: [device.registration_id], data: { message_text: 'Sample notification', 'lmAlarmId' => 10 } }
+      n.data = { registration_ids: [device.registration_id], data: { message_text: 'Sample notification', 'lmAlarmId' => 1 } }
       # lmAlarmId => landmark id
       n.save
     end
