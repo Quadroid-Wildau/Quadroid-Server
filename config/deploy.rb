@@ -83,7 +83,7 @@ end
 
 namespace :notifications do
   task :sample do
-    run "cd #{current_path} && bundle exec rake notifications:sample"
+    run "cd #{current_path} && RAILS_ENV=#{rails_env} bundle exec rake notifications:sample"
   end
 end
 
