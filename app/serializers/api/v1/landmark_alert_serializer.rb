@@ -1,7 +1,7 @@
 class API::V1::LandmarkAlertSerializer < ActiveModel::Serializer
-  attributes :id, :latitude, :longitude, :height, :detection_date, :image_url
+  attributes :id, :latitude, :longitude, :height, :detection_date, :image_path
 
-  def image_url
+  def image_path
     "http://placekitten.com/g/200/300"
   end
 
