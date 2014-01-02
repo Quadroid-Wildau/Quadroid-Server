@@ -5,7 +5,7 @@ class Api::V1::GcmDevicesController < Api::V1::BaseController
   # gcm_device[registration_id]
   def create
     if params[:gcm_device].present? && params[:gcm_device][:registration_id].present?
-      dev = current_resource_owner.gcm_devices.where(registration_id: params[:gcm_device][:registration_id])
+      dev = current_resource_owner.gcm_devices.where(registration_id: params[:gcm_device][:registration_id]).first
       if dev
         render json: dev, serializer: ::Api::V1::GcmDeviceSerializer, status: :ok
       else
@@ -30,7 +30,7 @@ class Api::V1::GcmDevicesController < Api::V1::BaseController
   # :id > registration_id
   def show
     if params[:gcm_device].present? && params[:gcm_device][:registration_id].present?
-      dev = current_resource_owner.gcm_devices.where(registration_id: params[:gcm_device][:registration_id])
+      dev = current_resource_owner.gcm_devices.where(registration_id: params[:gcm_device][:registration_id]).first
     end
 
     if dev
