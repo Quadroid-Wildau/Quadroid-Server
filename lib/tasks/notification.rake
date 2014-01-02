@@ -13,7 +13,7 @@ namespace :notifications do
       n.save
     end
 
-    Gcm::Notification.send_notifications
+    puts Gcm::Notification.send_notifications
   end
 
 end
