@@ -7,9 +7,9 @@ namespace :notifications do
       n = Gcm::Notification.new
       n.device = device
       n.collapse_key = 'updates_available'
-      # n.delay_while_idle = true
-      # n.data = { registration_ids: ["RegistrationID"], data: { message_text: 'Sample notification' } }
-      n.data = { registration_ids: [device.registration_id], data: { message_text: 'Sample notification' } }
+      n.delay_while_idle = true
+      n.data = { registration_ids: [device.registration_id], data: { message_text: 'Sample notification', 'lmAlarmId' => 10 } }
+      # lmAlarmId => landmark id
       n.save
     end
 
