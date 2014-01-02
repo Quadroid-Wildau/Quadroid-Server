@@ -81,6 +81,12 @@ namespace :deploy do
 
 end
 
+namespace :notifications do
+  task :sample do
+    run "cd #{current_path} && bundle exec rake notifications:sample"
+  end
+end
+
 before 'deploy:setup', 'rvm:create_gemset'
 after 'deploy:setup', 'deploy:setup_rvm'
 after 'deploy:setup_rvm', 'deploy:install_bundler_gem'
