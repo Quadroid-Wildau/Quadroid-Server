@@ -30,6 +30,7 @@ class Api::V1::LandmarkAlertsController < Api::V1::BaseController
     detection_date = Time.at(landmark_date) if landmark_date > 0
     landmark = LandmarkAlert.new(params[:landmark_alert].merge( detection_date: detection_date ))
     if landmark.save
+      notify_gcm_devices(landmark, :create)
       render json: landmark, serializer: ::API::V1::LandmarkAlertSerializer, status: :ok
     else
       render json: { error: { code: 1, messages: landmark.errors.messages } }, status: :bad_request
@@ -54,6 +55,7 @@ class Api::V1::LandmarkAlertsController < Api::V1::BaseController
     end
 
     if landmark.update_attributes(params[:landmark_alert])
+      notify_gcm_devices(landmark, :update)
       render json: landmark, serializer: ::API::V1::LandmarkAlertSerializer, status: :ok
     else
       render json: { error: { code: 2, messages: landmark.errors.messages } }, status: :bad_request
@@ -71,6 +73,24 @@ class Api::V1::LandmarkAlertsController < Api::V1::BaseController
     else
       render json: { error: { code: 1, message: 'Resource not found' } }, status: :not_found
     end
+  end
+
+
+  protected
+
+  def notify_gcm_devices(landmark, action)
+    devices = Gcm::Device.all
+    devices.each do |device|
+      n = Gcm::Notification.new
+      n.device = device
+      n.collapse_key = "landmark_#{landmark.id}"
+      n.delay_while_idle = true
+      text = action == :update ? 'Landmark alert updated.' : 'Landmark alert added.'
+      n.data = { registration_ids: [device.registration_id], data: { message_text: text, 'lmAlarmId' => landmark.id } }
+      n.save
+    end
+
+    Gcm::Notification.send_notifications
   end
 
 end
