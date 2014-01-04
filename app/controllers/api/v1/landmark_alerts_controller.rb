@@ -84,7 +84,7 @@ class Api::V1::LandmarkAlertsController < Api::V1::BaseController
       n = Gcm::Notification.new
       n.device = device
       n.collapse_key = "landmark_#{landmark.id}"
-      n.delay_while_idle = true
+      n.delay_while_idle = false
       text = action == :update ? 'Landmark alert updated.' : 'Landmark alert added.'
       n.data = { registration_ids: [device.registration_id], data: { message_text: text, 'lmAlarmId' => landmark.id } }
       n.save
