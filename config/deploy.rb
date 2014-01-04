@@ -56,7 +56,7 @@ namespace :deploy do
 
     # rvm config
     run "touch #{release_path}/.rvmrc"
-    run "ln -s #{shared_path}/.rvmrc #{release_path}/.rvmrc"
+    run "ln -nfs #{shared_path}/.rvmrc #{release_path}/.rvmrc"
   end
 
   task :bundle, :roles => :app do
