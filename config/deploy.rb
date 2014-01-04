@@ -50,6 +50,10 @@ namespace :deploy do
     run "touch #{release_path}/config/application.yml"
     run "ln -nfs #{shared_path}/config/application.yml #{release_path}/config/application.yml"
 
+    # files folder
+    run "mkdir -p #{shared_path}/files && mkdir -p #{release_path}/public/files"
+    run "ln -nfs #{shared_path}/files #{release_path}/public/files"
+
     # rvm config
     run "touch #{release_path}/.rvmrc"
     run "ln -nfs #{shared_path}/.rvmrc #{release_path}/.rvmrc"
